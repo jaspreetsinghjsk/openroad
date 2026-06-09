@@ -1,0 +1,19 @@
+project_name             = "openroad"
+environment              = "dev"
+location                 = "australiaeast"
+storage_replication_type = "LRS"
+video_container_name     = "videos"
+app_service_sku          = "B1"
+node_version             = "20-lts"
+
+# Set to true when you are ready to persist users, courses, lessons, and progress.
+create_postgres = false
+
+tags = {
+  owner = "openroad"
+}
+
+# Add runtime secrets here or inject them through your deployment pipeline.
+app_settings = {
+  NEXT_PUBLIC_APP_NAME = "OpenRoad"
+}
