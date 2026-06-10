@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { logout } from "@/app/auth/actions";
+import { getCurrentUser } from "@/lib/auth";
 
-export function Header() {
+export async function Header() {
+  const user = await getCurrentUser();
+
   return (
     <header className="siteHeader">
       <Link className="brand" href="/">
@@ -10,6 +14,15 @@ export function Header() {
       <nav className="navLinks" aria-label="Primary navigation">
         <Link href="/trainee">Trainee</Link>
         <Link href="/trainer">Trainer</Link>
+        {user ? (
+          <form action={logout}>
+            <button className="linkButton" type="submit">
+              Log out
+            </button>
+          </form>
+        ) : (
+          <Link href="/auth">Log in</Link>
+        )}
       </nav>
     </header>
   );

@@ -66,6 +66,16 @@ a {
   font-weight: 700;
 }
 
+.linkButton {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+}
+
 .hero {
   display: grid;
   gap: 36px;
@@ -276,11 +286,47 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   border: 1px solid var(--line);
   border-radius: 8px;
   font: inherit;
   padding: 12px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.authShell {
+  display: grid;
+  gap: 24px;
+  padding: 40px clamp(20px, 5vw, 72px) 72px;
+}
+
+.authGrid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  max-width: 900px;
+}
+
+.authPanel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+.errorMessage {
+  background: #fff1f1;
+  border: 1px solid #f0c6c6;
+  border-radius: 8px;
+  color: #8d1f1f;
+  font-weight: 700;
+  padding: 12px 14px;
 }
 
 .publishedList {

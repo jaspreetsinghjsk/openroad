@@ -6,14 +6,21 @@ video_container_name     = "videos"
 app_service_sku          = "B1"
 node_version             = "20-lts"
 
-# Set to true when you are ready to persist users, courses, lessons, and progress.
-create_postgres = false
+create_sql_database      = true
+sql_database_name        = "openroad"
+sql_database_sku_name    = "Basic"
+sql_database_max_size_gb = 2
+sql_allow_azure_services = true
+
+# Defaults to the principal running Terraform. Set these when a specific Entra user or group should administer SQL.
+# sql_administrator_login_username = "OpenRoad SQL Admins"
+# sql_administrator_object_id      = "00000000-0000-0000-0000-000000000000"
 
 tags = {
   owner = "openroad"
 }
 
-# Add runtime secrets here or inject them through your deployment pipeline.
+# Non-secret settings only. Use managed identity for Azure SQL and Storage access.
 app_settings = {
   NEXT_PUBLIC_APP_NAME = "OpenRoad"
 }

@@ -53,44 +53,49 @@ variable "node_version" {
 }
 
 variable "app_settings" {
-  description = "Additional app settings for the web app."
+  description = "Additional non-secret app settings for the web app. Do not put passwords, keys, or connection strings with credentials here."
   type        = map(string)
   default     = {}
-  sensitive   = true
 }
 
-variable "create_postgres" {
-  description = "Whether to create Azure Database for PostgreSQL Flexible Server for app metadata."
+variable "create_sql_database" {
+  description = "Whether to create Azure SQL Database for app metadata."
   type        = bool
-  default     = false
+  default     = true
 }
 
-variable "postgres_sku_name" {
-  description = "PostgreSQL Flexible Server SKU."
-  type        = string
-  default     = "B_Standard_B1ms"
-}
-
-variable "postgres_storage_mb" {
-  description = "PostgreSQL storage in MB."
-  type        = number
-  default     = 32768
-}
-
-variable "postgres_version" {
-  description = "PostgreSQL major version."
-  type        = string
-  default     = "16"
-}
-
-variable "postgres_admin_username" {
-  description = "PostgreSQL administrator username."
-  type        = string
-  default     = "openroad_admin"
-}
-
-variable "postgres_database_name" {
-  description = "Application database name."
+variable "sql_database_name" {
+  description = "Azure SQL database name for application metadata."
   type        = string
   default     = "openroad"
+}
+
+variable "sql_database_sku_name" {
+  description = "Azure SQL Database SKU. Basic is suitable only for development."
+  type        = string
+  default     = "Basic"
+}
+
+variable "sql_database_max_size_gb" {
+  description = "Azure SQL Database maximum size in GB."
+  type        = number
+  default     = 2
+}
+
+variable "sql_administrator_login_username" {
+  description = "Microsoft Entra administrator display name for Azure SQL. Defaults to the principal running Terraform."
+  type        = string
+  default     = null
+}
+
+variable "sql_administrator_object_id" {
+  description = "Microsoft Entra object ID for the Azure SQL administrator. Defaults to the principal running Terraform."
+  type        = string
+  default     = null
+}
+
+variable "sql_allow_azure_services" {
+  description = "Whether to allow Azure services to reach the Azure SQL Server public endpoint. Keep true for minimal App Service connectivity; replace with private networking for production."
+  type        = bool
+  default     = true
 }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { VideoPlayer } from "@/components/VideoPlayer";
-import { getCourse } from "@/lib/data";
+import { getCourse } from "@/lib/course-store";
 
 type CoursePageProps = {
   params: Promise<{
@@ -12,7 +12,7 @@ type CoursePageProps = {
 
 export default async function CoursePage({ params }: CoursePageProps) {
   const { courseId } = await params;
-  const course = getCourse(courseId);
+  const course = await getCourse(courseId);
 
   if (!course) {
     notFound();

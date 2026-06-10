@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { CourseCard } from "@/components/CourseCard";
 import { Header } from "@/components/Header";
-import { courses } from "@/lib/data";
+import { getCourses } from "@/lib/course-store";
 
-export default function Home() {
+export default async function Home() {
+  const courses = await getCourses();
+
   return (
     <>
       <Header />
@@ -20,7 +22,7 @@ export default function Home() {
                 Browse training
               </Link>
               <Link className="button secondaryButton" href="/trainer">
-                Upload a course
+                Publish a course
               </Link>
             </div>
           </div>

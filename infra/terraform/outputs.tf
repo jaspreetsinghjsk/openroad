@@ -23,13 +23,17 @@ output "video_container_name" {
   value       = azurerm_storage_container.videos.name
 }
 
-output "postgres_fqdn" {
-  description = "PostgreSQL Flexible Server FQDN when create_postgres is true."
-  value       = var.create_postgres ? azurerm_postgresql_flexible_server.metadata[0].fqdn : null
+output "sql_server_fqdn" {
+  description = "Azure SQL Server FQDN when create_sql_database is true."
+  value       = var.create_sql_database ? azurerm_mssql_server.metadata[0].fully_qualified_domain_name : null
 }
 
-output "postgres_admin_password" {
-  description = "Generated PostgreSQL admin password when create_postgres is true."
-  value       = var.create_postgres ? random_password.postgres_admin[0].result : null
-  sensitive   = true
+output "sql_database_name" {
+  description = "Azure SQL Database name when create_sql_database is true."
+  value       = var.create_sql_database ? azurerm_mssql_database.app[0].name : null
+}
+
+output "web_app_managed_identity_principal_id" {
+  description = "System-assigned managed identity principal ID for granting database permissions."
+  value       = azurerm_linux_web_app.web.identity[0].principal_id
 }

@@ -11,18 +11,14 @@ locals {
   )
 }
 
+data "azurerm_client_config" "current" {}
+
 resource "random_string" "suffix" {
   length  = 6
   lower   = true
   numeric = true
   special = false
   upper   = false
-}
-
-resource "random_password" "postgres_admin" {
-  count   = var.create_postgres ? 1 : 0
-  length  = 24
-  special = true
 }
 
 resource "azurerm_resource_group" "main" {
@@ -95,9 +91,9 @@ resource "azurerm_linux_web_app" "web" {
       AZURE_STORAGE_VIDEO_CONTAINER              = azurerm_storage_container.videos.name
       APPLICATIONINSIGHTS_CONNECTION_STRING      = azurerm_application_insights.web.connection_string
       ApplicationInsightsAgent_EXTENSION_VERSION = "~3"
-      DATABASE_HOST                              = var.create_postgres ? azurerm_postgresql_flexible_server.metadata[0].fqdn : ""
-      DATABASE_NAME                              = var.create_postgres ? azurerm_postgresql_flexible_server_database.app[0].name : ""
-      DATABASE_USER                              = var.create_postgres ? var.postgres_admin_username : ""
+      AZURE_SQL_SERVER_FQDN                      = var.create_sql_database ? azurerm_mssql_server.metadata[0].fully_qualified_domain_name : ""
+      AZURE_SQL_DATABASE_NAME                    = var.create_sql_database ? azurerm_mssql_database.app[0].name : ""
+      SQL_CONNECTION_STRING                      = var.create_sql_database ? "Server=tcp:${azurerm_mssql_server.metadata[0].fully_qualified_domain_name},1433;Database=${azurerm_mssql_database.app[0].name};Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Managed Identity;" : ""
     },
     var.app_settings
   )
@@ -109,23 +105,37 @@ resource "azurerm_role_assignment" "web_storage_blob_contributor" {
   principal_id         = azurerm_linux_web_app.web.identity[0].principal_id
 }
 
-resource "azurerm_postgresql_flexible_server" "metadata" {
-  count                  = var.create_postgres ? 1 : 0
-  name                   = "${var.project_name}-${var.environment}-pg-${random_string.suffix.result}"
-  resource_group_name    = azurerm_resource_group.main.name
-  location               = azurerm_resource_group.main.location
-  version                = var.postgres_version
-  administrator_login    = var.postgres_admin_username
-  administrator_password = random_password.postgres_admin[0].result
-  storage_mb             = var.postgres_storage_mb
-  sku_name               = var.postgres_sku_name
-  tags                   = local.common_tags
+resource "azurerm_mssql_server" "metadata" {
+  count                         = var.create_sql_database ? 1 : 0
+  name                          = "${var.project_name}-${var.environment}-sql-${random_string.suffix.result}"
+  resource_group_name           = azurerm_resource_group.main.name
+  location                      = azurerm_resource_group.main.location
+  version                       = "12.0"
+  minimum_tls_version           = "1.2"
+  public_network_access_enabled = true
+  tags                          = local.common_tags
+
+  azuread_administrator {
+    login_username              = coalesce(var.sql_administrator_login_username, "terraform-deployer")
+    object_id                   = coalesce(var.sql_administrator_object_id, data.azurerm_client_config.current.object_id)
+    tenant_id                   = data.azurerm_client_config.current.tenant_id
+    azuread_authentication_only = true
+  }
 }
 
-resource "azurerm_postgresql_flexible_server_database" "app" {
-  count     = var.create_postgres ? 1 : 0
-  name      = var.postgres_database_name
-  server_id = azurerm_postgresql_flexible_server.metadata[0].id
-  charset   = "UTF8"
-  collation = "en_US.utf8"
+resource "azurerm_mssql_database" "app" {
+  count       = var.create_sql_database ? 1 : 0
+  name        = var.sql_database_name
+  server_id   = azurerm_mssql_server.metadata[0].id
+  sku_name    = var.sql_database_sku_name
+  max_size_gb = var.sql_database_max_size_gb
+  tags        = local.common_tags
+}
+
+resource "azurerm_mssql_firewall_rule" "allow_azure_services" {
+  count            = var.create_sql_database && var.sql_allow_azure_services ? 1 : 0
+  name             = "AllowAzureServices"
+  server_id        = azurerm_mssql_server.metadata[0].id
+  start_ip_address = "0.0.0.0"
+  end_ip_address   = "0.0.0.0"
 }

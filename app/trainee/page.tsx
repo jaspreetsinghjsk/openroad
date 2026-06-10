@@ -1,8 +1,10 @@
 import { CourseCard } from "@/components/CourseCard";
 import { Header } from "@/components/Header";
-import { courses } from "@/lib/data";
+import { getCourses } from "@/lib/course-store";
 
-export default function TraineeDashboard() {
+export default async function TraineeDashboard() {
+  const courses = await getCourses();
+
   return (
     <>
       <Header />
